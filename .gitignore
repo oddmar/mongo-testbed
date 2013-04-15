@@ -1,0 +1,14 @@
+*~
+bin
+target
+.settings
+.classpath
+.project
+test-output
+.metadata
+.checkstyle
+*.iml
+.idea
+.DS_Store
+*.log
+*.log.*

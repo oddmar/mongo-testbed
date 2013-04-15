@@ -1,0 +1,74 @@
+#!/bin/bash
+#
+# Script for starting/stopping MongoDB from the command line.
+# Written for OS X, but can be adapted for other Unix dialects
+# Contains some configuration parameters for MongoDB
+#
+
+if [ -z $1 ] ; then
+  echo "Usage: $0 [start|stop|restart] "
+  exit 1
+fi
+
+# Source the common setup functions for startup scripts
+test -r /etc/rc.common || exit 1
+. /etc/rc.common
+
+# Default target for MongoDB on OS X:
+MONGOD='/usr/local/bin/mongod'
+
+# Listening port
+MONGOD_PORT=27017
+
+# Set data and log paths. Do this the first time:
+#       sudo mkdir /var/data/mongodb/db; sudo chmod a+w /var/data/mongodb/db
+#       sudo mkdir /var/log/mongodb; sudo chmod a+w /var/log/mongodb
+#
+DBPATH='/var/data/mongodb/db'
+LOGPATH='/var/log/mongodb/mongod.log'
+
+if [ ! -w $DBPATH ] ; then
+  echo "Data directory $DBPATH does not exist or is not writable for this user"
+  exit 1
+fi
+if [ ! -w $LOGPATH ] ; then
+  echo "Log directory $LOGPATH does not exist or is not writable for this user"
+  exit 1
+fi
+
+
+# Get the current PID, if any
+getPid() {
+    echo `/usr/sbin/lsof -i tcp:$MONGOD_PORT | tail -1 | awk '{print $2}'`
+}
+
+# start command
+StartService(){
+
+    lePid=$(getPid)
+	if [ "$lePid" != "" ]; then
+		echo 'Process already running'
+		exit
+	fi
+
+	$MONGOD run --dbpath=$DBPATH --logpath=$LOGPATH --port $MONGOD_PORT --config mongoDB.conf --rest > /dev/null 2>&1 &
+}
+
+# stop command
+StopService() {
+
+    lePid=$(getPid)
+	# If we've found a PID, let's kill it
+	if [ "$lePid" != "" ]; then
+		kill -15 $lePid
+	fi
+}
+
+# restart command
+RestartService() {
+	StopService
+	sleep 3
+	StartService
+}
+
+RunService $1
