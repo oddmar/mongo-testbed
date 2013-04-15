@@ -1,6 +1,6 @@
-evry-mongo-demo
+mongo-testbed
 -------
-Demo using MongoDB using Java APIs
+Testing out MongoDB, using both Java and JavaScript language bindings
 
 Starting MongoDB
 ------------------
